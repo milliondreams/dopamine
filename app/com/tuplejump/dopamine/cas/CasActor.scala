@@ -42,12 +42,12 @@ case class Connection(session: Session)
 class CasActor extends Actor with ActorLogging {
 
   def receive = {
-    case connectInfo: Connect => {
+    case Connect(contactPoints, port, username, password) => {
       val cluster = {
-        val builder = Cluster.builder().addContactPoints(connectInfo.contactPoints: _*)
-        builder.withPort(connectInfo.port.get)
+        val builder = Cluster.builder().addContactPoints(contactPoints: _*)
+        builder.withPort(port.get)
 
-        (connectInfo.username, connectInfo.password) match {
+        (username, password) match {
           case (Some(u), Some(p)) => {
             builder.withCredentials(u, p)
           }
@@ -56,6 +56,7 @@ class CasActor extends Actor with ActorLogging {
             log.debug("No user/password")
           }
         }
+
         builder.build()
       }
 
@@ -63,7 +64,6 @@ class CasActor extends Actor with ActorLogging {
 
       context.become {
         case Query(id, query, opt) => {
-          //core.Query
           val result = session.execute(query)
           log.info(result.toString)
           val response: JsArray = resultToJson(result)
