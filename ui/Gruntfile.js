@@ -267,7 +267,7 @@ module.exports = function (grunt) {
     'coffee:dist',
     'compass:server',
     'livereload-start',
-    'connect:livereload',
+    //'connect:livereload',
     'open',
     'watch'
   ]);
@@ -287,10 +287,10 @@ module.exports = function (grunt) {
     'coffee',
     'compass:dist',
     'useminPrepare',
+    'concat',
     'imagemin',
     'cssmin',
     'htmlmin',
-    'concat',
     'copy',
     'cdnify',
     'ngmin',

@@ -9,16 +9,19 @@ import com.datastax.driver.core.Cluster
  * Time: 6:56 PM
  * To change this template use File | Settings | File Templates.
  */
-class CassandraDB(node: String, keyspace: String) {
-  def this(node: String) = this(node, null)
+class CassandraDB(node: String) {
 
-  private lazy val cluster: Cluster = {
+  private lazy val cluster = {
     Cluster.builder()
       .addContactPoint(node).build()
   }
 
-  private lazy val session = {
-    if (keyspace == null) cluster.connect() else cluster.connect(keyspace)
+  private lazy val session =
+    cluster.connect()
+
+
+  def connect() = {
+    session
   }
 
   def query(query: String) = {

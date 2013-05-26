@@ -1,9 +1,32 @@
-<div class="hero-unit">
-  <h1>'Allo, 'Allo!</h1>
-  <p>You now have</p>
-  <ul>
-      <li ng-repeat="thing in awesomeThings">{{thing}}</li>
-  </ul>
-  <p>installed.</p>
-  <h3>Enjoy coding! - Yeoman</h3>
+<div>
+    <form class="form-horizontal">
+        <legend>Login</legend>
+        <div class="control-group">
+            <label class="control-label" for="inputServer">Server</label>
+            <div class="controls">
+                <input type="text" id="inputServer" value="localhost">
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="inputUser">User</label>
+            <div class="controls">
+                <input type="text" id="inputUser">
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="inputPassword">Password</label>
+            <div class="controls">
+                <input type="password" id="inputPassword">
+            </div>
+        </div>
+        <div class="control-group">
+            <div class="controls">
+                <!-- label class="checkbox">
+                    <input type="checkbox"> Remember me
+                </label -->
+                <button type="submit" class="btn">Sign in</button>
+            </div>
+        </div>
+    </form>
+
 </div>
