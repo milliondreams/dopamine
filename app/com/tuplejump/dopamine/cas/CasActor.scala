@@ -12,6 +12,8 @@ import play.api.libs.json.JsBoolean
 import scala.Some
 import play.api.libs.json.JsNumber
 import play.api.libs.json.JsObject
+import org.joda.time.DateTime
+import scala.util.{Success, Try, Failure}
 
 object CasDefaults {
   val host = List("localhost")
@@ -23,10 +25,14 @@ object CasDefaults {
 /* messages */
 sealed trait Message
 
-case class Connect(contactPoints: List[String] = CasDefaults.host,
+case class Connect(reqId: String, contactPoints: List[String] = CasDefaults.host,
                    port: Option[Int] = CasDefaults.port,
                    username: Option[String] = CasDefaults.username,
                    password: Option[String] = None) extends Message
+
+case class Connected(reqId: String)
+
+case class ErrorWithFailure(msg: String, failure: Failure[_ <: Throwable])
 
 case class Query(msgId: String, cql: String, opts: Option[Map[String, String]] = None) extends Message
 
@@ -42,7 +48,7 @@ case class Connection(session: Session)
 class CasActor extends Actor with ActorLogging {
 
   def receive = {
-    case Connect(contactPoints, port, username, password) => {
+    case Connect(reqId, contactPoints, port, username, password) => {
       val cluster = {
         val builder = Cluster.builder().addContactPoints(contactPoints: _*)
         builder.withPort(port.get)
@@ -60,21 +66,40 @@ class CasActor extends Actor with ActorLogging {
         builder.build()
       }
 
-      val session = cluster.connect()
+      val mayBeSession = Try(cluster.connect())
 
-      context.become {
-        case Query(id, query, opt) => {
-          val result = session.execute(query)
-          log.info(result.toString)
-          val response: JsArray = resultToJson(result)
+      mayBeSession match {
+        case Success(session) => {
+          sender ! Connected(reqId)
 
-          log.info(response.toString())
-          sender ! Result(id, response)
+          context.become {
+            case Query(id, query, opt) => {
+              val mayBeResult = Try(session.execute(query))
+
+              mayBeResult match {
+                case Success(result) => {
+                  log.info(result.toString)
+                  val response: JsArray = resultToJson(result)
+
+                  log.info(response.toString())
+                  sender ! Result(id, response)
+                }
+
+                case Failure(f) => {
+                  sender ! ErrorWithFailure("Error connecting to the cassandra server", Failure(f))
+                }
+              }
+            }
+
+            case Disconnect => {
+              session.shutdown()
+              context.unbecome()
+            }
+          }
         }
 
-        case Disconnect => {
-          session.shutdown()
-          context.unbecome()
+        case Failure(f) => {
+          sender ! ErrorWithFailure("Error connecting to the cassandra server", Failure(f))
         }
       }
     }
