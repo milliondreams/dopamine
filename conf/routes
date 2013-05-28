@@ -11,4 +11,4 @@ GET     /assets/*file               controllers.Assets.at(path="/public", file)
 # Home page
 GET     /                           controllers.Application.index
 
-#GET      /db                         controllers.Application.dbSocket(host, port ?= Some(9042),  username ?= None, password ?= None)
+GET      /db                         controllers.Application.dbSocket(host:List[String], port:Option[Int],  username:Option[String], password:Option[String])
