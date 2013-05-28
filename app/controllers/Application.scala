@@ -47,25 +47,25 @@ class CommandActor extends Actor with ActorLogging {
 
   def idle: PartialFunction[Any, Unit] = {
     case Join => {
-      log.info("Entering join...")
+      log.debug("Entering join...")
       sender ! CasSocket(dbEnumerator)
       context.become(disconnected orElse inform orElse handleError)
     }
 
-    case x => {
-      log.error("Invalid message" + x.toString)
+    case invalidMsg => {
+      log.error("Invalid message -- " + invalidMsg.toString)
     }
   }
 
   private def disconnected: PartialFunction[Any, Unit] = {
     case c: Connect => {
-      val originalSender = sender
       (casActor ? c) map {
         case c: Connected => {
-          originalSender ! c
+          dbChannel.push(Json.obj("status" -> "success"))
           context.become(connected orElse inform orElse handleError)
         }
       }
+
     }
   }
 
@@ -89,11 +89,21 @@ class CommandActor extends Actor with ActorLogging {
       log.error(e.failure.failed.get, "Error connecting to cassandra")
       dbChannel.push(Json.obj("status" -> "error", "payload" -> e.msg))
     }
+
+    case b: scala.runtime.BoxedUnit => {
+      //These are control messages sent in become/unbecome... so ignore them
+      log.debug("Control message")
+    }
+
+    case unknown => {
+      log.error("Invalid message: " + unknown.toString)
+      dbChannel.push(Json.obj("status" -> "error", "payload" -> ("Unknown Message: " + unknown.toString)))
+    }
   }
 
   private def inform: PartialFunction[Any, Unit] = {
     case n: Notice => {
-      dbChannel.push(Json.obj("status" -> "message", "payload" -> n.msg))
+      dbChannel.push(Json.obj("status" -> n.status, "payload" -> n.msg))
     }
   }
 
@@ -111,26 +121,38 @@ object CommandActor {
 
   implicit val timeout = Timeout(5 seconds)
   implicit val connectReads = Json.reads[Connect]
+  implicit val queryReads = Json.reads[Query]
 
   def init: scala.concurrent.Future[(Iteratee[JsValue, _], Enumerator[JsValue])] = {
 
     val actor = Akka.system.actorOf(Props[CommandActor])
 
     (actor ? Join) map {
+
       case CasSocket(enumerator) => {
+
         Logger.info("Connected to actor " + actor.path)
         val iteratee = Iteratee.foreach[JsValue] {
+
           msg =>
             Logger.info("Got Message -- " + msg.toString())
+
             (msg \ "command").asOpt[String].getOrElse("_error") match {
+
               case "connect" => actor ! (msg \ "payload").validate[Connect].fold(
                 valid = (c => actor ! c),
-                invalid = (e => actor ! Notice("Invalid Connection JSON\n" + e.toString()))
+                invalid = (e => actor ! Notice("error", "Invalid Connection JSON \n" + e.toString()))
               )
-              case "query" => actor ! Query(DateTime.now().getMillis.toString, (msg \ "payload" \ "query").as[String])
+
+              case "query" => (msg \ "payload").validate[Query].fold(
+                valid = (q => actor ! q),
+                invalid = (e => actor ! Notice("error", "Invalid Query JSON \n" + e.toString()))
+              )
+
               case "_error" => {
-                actor ! Notice("Invalid Message. No command found!")
+                actor ! Notice("error", "Invalid Message. No command found!")
               }
+
             }
         }.map {
           _ =>
@@ -175,4 +197,4 @@ case class CasSocket(dbe: Enumerator[JsValue])
 
 case class Join()
 
-case class Notice(msg: String)
+case class Notice(status: String, msg: String)
