@@ -4,6 +4,7 @@ import play.api.mvc._
 import play.api.libs.json.JsValue
 import scala.Some
 import com.tuplejump.dopamine.cas.CommandActor
+import org.joda.time.DateTime
 
 object Application extends Controller {
 
@@ -17,7 +18,7 @@ object Application extends Controller {
                username: Option[String] = None, password: Option[String] = None) =
     WebSocket.async[JsValue] {
       request =>
-        CommandActor.init //(host, port, username, password)
+        CommandActor.init(DateTime.now().getMillis.toString) //(host, port, username, password)
     }
 
 }

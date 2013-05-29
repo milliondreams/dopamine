@@ -31,18 +31,19 @@ case class Connect(reqId: String, contactPoints: List[String] = CasDefaults.host
 
 case class Connected(reqId: String)
 
-case class ErrorWithFailure(msg: String, failure: Failure[_ <: Throwable])
+case class ErrorWithFailure(reqId: String, msg: String, failure: Failure[_ <: Throwable])
 
-case class Query(msgId: String, cql: String, opts: Option[Map[String, String]] = None) extends Message
+case class Query(reqId: String, cql: String, opts: Option[Map[String, String]] = None) extends Message
 
-case class QueryResult(msgId: String, response: JsValue) extends Message
+case class QueryResult(reqId: String, response: JsValue) extends Message
 
-case class Disconnect(msgId: String) extends Message
+case class Disconnect(reqId: String) extends Message
 
 class CasActor extends Actor with ActorLogging {
 
   def receive = {
     case Connect(reqId, contactPoints, port, username, password) => {
+      log.info("Inside connect in CasActor...")
       val mayBeCluster = {
         val builder = Cluster.builder().addContactPoints(contactPoints: _*)
         builder.withPort(port.getOrElse(9042))
@@ -83,7 +84,7 @@ class CasActor extends Actor with ActorLogging {
                     }
 
                     case Failure(f) => {
-                      sender ! ErrorWithFailure("Error connecting to the cassandra server", Failure(f))
+                      sender ! ErrorWithFailure(reqId, "Error connecting to the cassandra server", Failure(f))
                     }
                   }
                 }
@@ -96,13 +97,13 @@ class CasActor extends Actor with ActorLogging {
             }
 
             case Failure(f) => {
-              sender ! ErrorWithFailure("Error connecting to the cassandra server", Failure(f))
+              sender ! ErrorWithFailure(reqId, "Error connecting to the cassandra server", Failure(f))
             }
           }
         }
 
         case Failure(f) => {
-          sender ! ErrorWithFailure("Error connecting to cassandra", Failure(f))
+          sender ! ErrorWithFailure(reqId, "Error connecting to cassandra", Failure(f))
         }
       }
     }
