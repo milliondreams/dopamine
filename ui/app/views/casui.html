@@ -1,0 +1,13 @@
+<div>
+    <div class="span-2">
+        <div>Key Spaces</div>
+        <div ng-show="keyspaces.status == 'response'">
+            <div ng-repeat="keyspace in keyspaces.payload.response">
+                <div>{{keyspace.keyspace_name}}</div>
+            </div>
+        </div>
+    </div>
+    <div class="span-10">
+
+    </div>
+</div>

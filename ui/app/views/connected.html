@@ -1,1 +1,23 @@
-<p>This is the connected view.</p>
+<div>
+    <form class="form-horizontal">
+        <div class="control-group">
+            <label class="control-label" for="inputQueryText">Query</label>
+
+            <div class="controls">
+                <input type="text" id="inputQueryText" ng-model="query"/>
+            </div>
+        </div>
+        <button class="btn" ng-click="runQuery()">Run</button>
+    </form>
+
+    <ul>
+        <li class="query-result" ng-repeat="(reqId, query) in queries" id="query-{{reqId}}">
+            <div class="query">
+                {{query.cql}}
+            </div>
+            <div class="result">
+                <div ng-grid="resultGrid"></div>
+            </div>
+        </li>
+    </ul>
+</div>

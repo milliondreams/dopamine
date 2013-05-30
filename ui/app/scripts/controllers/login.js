@@ -1,24 +1,27 @@
 'use strict';
 
 angular.module('uiApp')
-    .controller('LoginCtrl', function ($scope, socketService, $location) {
-        //$scope.login.host = "localhost"
+    .controller('LoginCtrl', function ($scope, socketService, $location, $rootScope) {
+        $scope.login = {host: "localhost"};
 
-        $scope.login = function () {
+        $scope.loginToCas = function () {
             var host = $scope.login.host
             var msg = {"command": "connect", payload: {"contactPoints": host.split(",")}};
 
             socketService.sendMessage(msg).then(
                 function (message) {
-                    console.log("SUCCESS")
-                    console.log(message)
-                    $scope.login.response = message
-                    if(message.status == "success"){
-                        $location.path("/connected")
+
+                    console.log("SUCCESS");
+                    console.log(message);
+
+                    $scope.login.response = message;
+                    if (message.status === "success") {
+                        $rootScope.connected = true;
+                        $location.path("/casui");
                     }
                 },
                 function (message) {
-                    console.log("Message sending failed...")
+                    console.log("Message sending failed...");
 
                 }
             )

@@ -21,12 +21,18 @@ angular.module('uiApp')
 
         function sendRequest(request) {
             var defer = $q.defer();
-            var callbackId = getCallbackId();
-            callbacks[callbackId] = {
+
+            if (!(request.payload.hasOwnProperty("reqId"))) {
+                request["payload"].reqId = "other" + getCallbackId();
+            }
+
+            var reqId = request["payload"].reqId;
+
+            callbacks[reqId] = {
                 time: new Date(),
                 cb: defer
             };
-            request["payload"].reqId = callbackId;
+
             console.log('Sending request', request);
             ws.send(JSON.stringify(request));
             return defer.promise;
@@ -55,6 +61,7 @@ angular.module('uiApp')
 
         // Public API here
         return {
-            sendMessage: sendRequest
+            sendMessage: sendRequest,
+            getRequestId: getCallbackId
         };
     });
