@@ -22,8 +22,10 @@ angular.module('uiApp')
 
         runQuery("SELECT * from system.schema_keyspaces;", "keyspace").then(
             function (message) {
-                console.log(message);
-                $scope.keyspaces = message;
+                console.log("GOT MESSAGE");
+                console.log($scope);
+                //$scope.keyspaces = message;
+                console.log($scope.keyspaces);
             }
         );
 

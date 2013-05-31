@@ -1,13 +1,16 @@
 <div>
-    <div class="span-2">
-        <div>Key Spaces</div>
+    <div class="span-2" id="sidebar">
+        <legend>keyspaces</legend>
         <div ng-show="keyspaces.status == 'response'">
-            <div ng-repeat="keyspace in keyspaces.payload.response">
-                <div>{{keyspace.keyspace_name}}</div>
-            </div>
+            <accordian>
+                <accordion-group ng-repeat="keyspace in keyspaces.payload.response" heading="{{keyspace.keyspace_name}}" >
+                    <!-- div>{{keyspace.keyspace_name}}</div -->
+                </accordion-group>
+            </accordian>
         </div>
     </div>
-    <div class="span-10">
+    <div class="span-10" id="content">
 
     </div>
 </div>
+

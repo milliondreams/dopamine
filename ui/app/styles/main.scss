@@ -3,5 +3,14 @@
 @import "compass_twitter_bootstrap_responsive";
 
 body {
-  margin-top: 40px;
+  margin-top: 44px;
+}
+
+div#sidebar {
+  height: 600px;
+}
+
+div#content {
+  border-left: 1px solid #777;
+  height: 600px;
 }

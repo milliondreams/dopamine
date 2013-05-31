@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('uiApp', ['ngGrid'])
+angular.module('uiApp', ['ngGrid', 'ui.bootstrap'])
     .config(function ($routeProvider, $locationProvider) {
         $routeProvider
             .when('/', {
