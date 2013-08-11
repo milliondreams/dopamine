@@ -16,13 +16,13 @@ class ApplicationSpec extends Specification {
     
     "send 404 on a bad request" in {
       running(FakeApplication()) {
-        route(FakeRequest(GET, "/boum")) must beNone        
+        routeAndCall(FakeRequest(GET, "/boum")) must beNone        
       }
     }
     
     "render the index page" in {
       running(FakeApplication()) {
-        val home = route(FakeRequest(GET, "/")).get
+        val home = routeAndCall(FakeRequest(GET, "/")).get
         
         status(home) must equalTo(OK)
         contentType(home) must beSome.which(_ == "text/html")
