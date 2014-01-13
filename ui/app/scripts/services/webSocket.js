@@ -38,6 +38,10 @@ angular.module('uiApp')
             query: query,
             registerHandle: function (handler) {
                 resultHandlers.push(handler);
+            },
+            disconnect: function () {
+                var message = {"messageType": "disconnect"};
+                send(message);
             }
         };
     });

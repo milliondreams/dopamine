@@ -61,8 +61,21 @@ angular.module('uiApp')
             queryId += 1;
         };
 
-        WebSocket.registerHandle(queryResultHandler);
+        function disconnectHandler(data) {
+            if (data.status === "Disconnected") {
+                $location.path("/");
+                $scope.$apply();
+            }
+        }
+
         if ($rootScope.status === "Connected") {
             WebSocket.query("select * from system.schema_keyspaces", 0);
         }
+
+        $scope.disconnect = function () {
+            WebSocket.disconnect();
+        };
+
+        WebSocket.registerHandle(queryResultHandler);
+        WebSocket.registerHandle(disconnectHandler);
     }]);
