@@ -12,7 +12,7 @@ case class QueryResult(resultSet: ResultSet, queryId: Long)
 
 case class Disconnect()
 
-case class ErrorWithDetails(status: String, queryId: Long, msg: String)
+case class ErrorWithDetails(status: String, queryId: Option[Long], msg: String)
 
 class DBActor extends Actor with ActorLogging {
 
@@ -30,7 +30,7 @@ class DBActor extends Actor with ActorLogging {
                   sender ! new QueryResult(resultSet, queryId)
                 case Failure(e) =>
                   log.info(e.getMessage + " for " + query + " with id " + queryId)
-                  sender ! new ErrorWithDetails("QueryError", queryId, e.getMessage)
+                  sender ! new ErrorWithDetails("QueryError", Some(queryId), e.getMessage)
               }
             case Disconnect() =>
               session.shutdown()
@@ -40,7 +40,7 @@ class DBActor extends Actor with ActorLogging {
           })
           log.info("created session")
         case Failure(f) =>
-          sender ! new ErrorWithDetails("Connection Failure", -1, f.getMessage)
+          sender ! new ErrorWithDetails("Connection Failure", Option.empty, f.getMessage)
           log.info(f.getMessage)
       }
   }
