@@ -1,15 +1,12 @@
 package models
 
 import akka.actor.{ActorRef, Props, ActorLogging, Actor}
-import scala.concurrent.{Future, ExecutionContext}
-import play.api.libs.iteratee.{Concurrent, Enumerator, Iteratee}
 import play.api.libs.json.{Json, JsValue}
 import play.api.libs.concurrent.Akka
 import com.datastax.driver.core.ResultSet
 import play.api.Play.current
-import ExecutionContext.Implicits.global
 
-class WebSocketChannel(wsChannel: Concurrent.Channel[JsValue])
+class WebSocketChannel(out: ActorRef)
   extends Actor with ActorLogging {
 
   val backend = Akka.system.actorOf(DBActor.props)
@@ -38,32 +35,17 @@ class WebSocketChannel(wsChannel: Concurrent.Channel[JsValue])
     case QueryResult(resultSet: ResultSet, queryId: Long) =>
       val jsonResult = Json.obj("status" -> "QueryResult",
         "payload" -> Utils.resultToJson(resultSet), "queryId" -> queryId)
-      wsChannel.push(jsonResult)
+      out ! jsonResult
     case message: String =>
       val result = Json.obj("status" -> message)
-      wsChannel.push(result)
-    case error:ErrorWithDetails =>
-      wsChannel.push(Json.toJson(error))
+      out ! result
+    case error: ErrorWithDetails =>
+      out ! Json.toJson(error)
   }
 }
 
 object WebSocketChannel {
-  def props(channel: Concurrent.Channel[JsValue]): Props =
-    Props(classOf[WebSocketChannel], channel)
+  def props(out: ActorRef): Props =
+    Props(classOf[WebSocketChannel], out)
 
-  def init: Future[(Iteratee[JsValue, _], Enumerator[JsValue])] = {
-
-    var actor: ActorRef = null
-    val out = Concurrent.unicast[JsValue] {
-      channel =>
-        actor = Akka.system.actorOf(WebSocketChannel.props(channel))
-    }
-
-    Future {
-      val in = Iteratee.foreach[JsValue] {
-        jsReq => actor ! jsReq
-      }
-      (in, out)
-    }
-  }
 }

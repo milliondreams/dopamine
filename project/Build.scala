@@ -1,5 +1,8 @@
 import sbt._
+import Keys._
 import com.tuplejump.sbt.yeoman.Yeoman
+import play.Play.autoImport._
+import PlayKeys._
 
 
 object ApplicationBuild extends Build {
@@ -13,8 +16,11 @@ object ApplicationBuild extends Build {
     "com.typesafe.akka" % "akka-testkit_2.10" % "2.2.3" % "test"
   )
 
-  val main = play.Project(appName, appVersion, appDependencies).settings(
-    Yeoman.yeomanSettings: _*
+  val appSettings = Seq(version := appVersion, libraryDependencies ++= appDependencies) ++
+    Yeoman.yeomanSettings
+
+  val main = Project(appName, file(".")).enablePlugins(play.PlayScala).settings(
+    appSettings: _*
   )
 
 }

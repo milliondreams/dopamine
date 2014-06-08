@@ -29,8 +29,8 @@ class DBActorSpec extends Specification {
         val dbActor = TestActorRef(new DBActor())
         val sender = TestActorRef(new TestActor())
         dbActor.tell(new ConnectToCassandra(new CassandraDB), sender)
-        dbActor.tell(new DBQuery("SELECT * FROM demodb.emp;"), sender)
-        dbActor.tell(new DBQuery("SELECT first_name,last_name FROM demodb.emp;"), sender)
+        dbActor.tell(new DBQuery("SELECT * FROM demodb.emp;",1), sender)
+        dbActor.tell(new DBQuery("SELECT first_name,last_name FROM demodb.emp;",2), sender)
         dbActor.tell(new Disconnect(), sender)
         1 === 1
       }
