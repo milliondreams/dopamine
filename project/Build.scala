@@ -16,8 +16,9 @@ object ApplicationBuild extends Build {
     "com.typesafe.akka" % "akka-testkit_2.10" % "2.2.3" % "test"
   )
 
-  val appSettings = Seq(version := appVersion, libraryDependencies ++= appDependencies) ++
-    Yeoman.yeomanSettings
+  val appSettings = Seq(version := appVersion,
+    libraryDependencies ++= appDependencies,
+    scalaVersion := "2.10.4") ++ Yeoman.yeomanSettings
 
   val main = Project(appName, file(".")).enablePlugins(play.PlayScala).settings(
     appSettings: _*
