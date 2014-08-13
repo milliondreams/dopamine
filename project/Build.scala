@@ -17,6 +17,7 @@ object ApplicationBuild extends Build {
   )
 
   val appSettings = Seq(version := appVersion,
+    resolvers += Resolver.sonatypeRepo("snapshots"),
     libraryDependencies ++= appDependencies,
     scalaVersion := "2.10.4") ++ Yeoman.yeomanSettings
 
