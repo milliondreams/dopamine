@@ -1,18 +1,7 @@
 package models
 
-import akka.actor.{Props, Actor, ActorLogging}
-import com.datastax.driver.core.ResultSet
+import akka.actor.{Actor, ActorLogging, Props}
 import scala.util.{Failure, Success, Try}
-
-case class ConnectToCassandra(db: CassandraDB)
-
-case class DBQuery(query: String, queryId: Long)
-
-case class QueryResult(resultSet: ResultSet, queryId: Long)
-
-case class Disconnect()
-
-case class ErrorWithDetails(status: String, queryId: Option[Long], msg: String)
 
 class DBActor extends Actor with ActorLogging {
 
@@ -21,7 +10,7 @@ class DBActor extends Actor with ActorLogging {
       val mayBeSession = Try(db.getSession)
       mayBeSession match {
         case Success(session) =>
-          sender ! "Connected"
+          sender ! Connected
           context.become({
             case DBQuery(query, queryId) =>
               val mayBeResult = Try(session.execute(query))
@@ -30,17 +19,17 @@ class DBActor extends Actor with ActorLogging {
                   sender ! new QueryResult(resultSet, queryId)
                 case Failure(e) =>
                   log.info(e.getMessage + " for " + query + " with id " + queryId)
-                  sender ! new ErrorWithDetails("QueryError", Some(queryId), e.getMessage)
+                  sender ! new InvalidQuery(queryId, e.getMessage)
               }
             case Disconnect() =>
               session.shutdown()
               log.info("disconnected session")
               context.unbecome()
-              sender ! "Disconnected"
+              sender ! Disconnected
           })
           log.info("created session")
         case Failure(f) =>
-          sender ! new ErrorWithDetails("Connection Failure", Option.empty, f.getMessage)
+          sender ! new ConnectionFailure(f.getMessage)
           log.info(f.getMessage)
       }
   }

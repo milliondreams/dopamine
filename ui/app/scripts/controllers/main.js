@@ -19,7 +19,7 @@ angular.module('uiApp')
                 $location.path("/workbench");
                 $scope.$apply();
             } else if (data.status === "Connection Failure") {
-                $scope.error = data.msg;
+                $scope.error = data.errorMsg;
                 $scope.$apply();
             }
         }

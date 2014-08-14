@@ -45,13 +45,13 @@ angular.module('uiApp')
                         });
                     }
                 }
-            } else if (data.status === "QueryError") {
+            } else if (data.status === "Invalid Query") {
                 tabId = $scope.queryTab.filter(function (t) {
                     return t.queryId === data.queryId;
                 })[0].id;
                 resultTab = _.where($scope.tabs, {id: tabId})[0];
                 if (resultTab) {
-                    resultTab.error = data.msg;
+                    resultTab.error = data.errorMsg;
                     resultTab.result = [];
                 }
             }
