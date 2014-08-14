@@ -22,7 +22,7 @@
                         <input type="submit" class="btn btn-success" value="Query">
                     </form>
                 </div>
-                <div class="result col-xs-12" data-ng-grid="{data:'tab.result'}"
+                <div class="result col-xs-12" data-ng-grid="{data:'tab.result',columnDefs:'tab.resultCols'}"
                      data-ng-show="tab.result.length>0">
                 </div>
                 <div class="alert alert-danger"

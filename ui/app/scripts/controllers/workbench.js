@@ -40,6 +40,9 @@ angular.module('uiApp')
                     if (resultTab) {
                         resultTab.error = "";
                         resultTab.result = data.payload;
+                        resultTab.resultCols = _.map(Object.keys(data.payload[0]), function (k) {
+                            return {field: k, displayName: k}
+                        });
                     }
                 }
             } else if (data.status === "QueryError") {
