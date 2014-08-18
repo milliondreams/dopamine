@@ -23,10 +23,12 @@
                     </form>
                 </div>
                 <div class="result col-xs-12" data-ng-grid="{data:'tab.result',columnDefs:'tab.resultCols'}"
-                     data-ng-show="tab.result.length>0">
+                     data-ng-show="!isInvalidQuery(tab) && !isEmptyResponse(tab)">
                 </div>
                 <div class="alert alert-danger"
-                     data-ng-show="tab.error.length>0">{{tab.error}}</div>
+                     data-ng-show="isInvalidQuery(tab)">{{tab.error}}</div>
+                <div class="alert alert-success"
+                     data-ng-show="!isInvalidQuery(tab) && isEmptyResponse(tab)">Query Executed successfully</div>
             </tab>
         </tabset>
     </div>
