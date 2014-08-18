@@ -12,7 +12,7 @@ class WebSocketChannel(out: ActorRef)
   implicit val dbRead = Json.reads[CassandraDB]
   implicit val queryRead = Json.reads[DBQuery]
 
-  private def convertJson(jsRequest: JsValue): WebSocketMessages = {
+  private def convertJsonToMsg(jsRequest: JsValue): WebSocketMessages = {
     val requestType = (jsRequest \ "messageType").as[String]
     var message: WebSocketMessages = null
     requestType match {
@@ -29,17 +29,15 @@ class WebSocketChannel(out: ActorRef)
 
   def receive: Actor.Receive = {
     case jsRequest: JsValue =>
-      backend ! convertJson(jsRequest)
-    case x:DBResponse =>
+      backend ! convertJsonToMsg(jsRequest)
+    case x:DBStatus =>
       out ! x.toJson
-    case message: String =>
-      val result = Json.obj("status" -> message)
-      out ! result
+    case x: DBResponse =>
+      out ! x.toJson
   }
 }
 
 object WebSocketChannel {
   def props(out: ActorRef): Props =
     Props(classOf[WebSocketChannel], out)
-
 }

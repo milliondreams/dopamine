@@ -10,7 +10,7 @@ class DBActor extends Actor with ActorLogging {
       val mayBeSession = Try(db.getSession)
       mayBeSession match {
         case Success(session) =>
-          sender ! Connected
+          sender ! Connected()
           context.become({
             case DBQuery(query, queryId) =>
               val mayBeResult = Try(session.execute(query))
@@ -25,7 +25,7 @@ class DBActor extends Actor with ActorLogging {
               session.shutdown()
               log.info("disconnected session")
               context.unbecome()
-              sender ! Disconnected
+              sender ! Disconnected()
           })
           log.info("created session")
         case Failure(f) =>

@@ -26,4 +26,4 @@ class DBStatus(status: String) extends DBResponse {
 }
 
 case class Connected(status: String = "Connected") extends DBStatus(status)
-case class Disconnected(status: String = "Disonnected") extends DBStatus(status)
+case class Disconnected(status: String = "Disconnected") extends DBStatus(status)
