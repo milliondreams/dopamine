@@ -5,7 +5,7 @@ import play.Play.autoImport._
 import PlayKeys._
 
 
-object ApplicationBuild extends Build {
+object DopamineBuild extends Build {
 
   val appName = "dopamine"
   val appVersion = "1.0"
