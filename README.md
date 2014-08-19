@@ -1,4 +1,4 @@
-###Dopamine
+#Dopamine
 
 A MySQL Workbench like tool for Cassandra.
 
